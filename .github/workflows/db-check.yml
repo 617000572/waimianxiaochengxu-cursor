@@ -1,0 +1,25 @@
+name: DB Connectivity Check
+
+on:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      MYSQL_HOST: ${{ secrets.MYSQL_HOST }}
+      MYSQL_PORT: ${{ secrets.MYSQL_PORT }}
+      MYSQL_DB:   ${{ secrets.MYSQL_DB }}
+      MYSQL_USER: ${{ secrets.MYSQL_USER }}
+      MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+    steps:
+      - name: Install MySQL client
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y mysql-client
+      - name: Check TCP connectivity
+        run: |
+          nc -vz $MYSQL_HOST $MYSQL_PORT
+      - name: Try login and simple query
+        run: |
+          mysql --connect-timeout=5 -h "$MYSQL_HOST" -P "$MYSQL_PORT" -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DB" -e "SELECT 1 AS ok;"
